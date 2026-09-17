@@ -62,73 +62,197 @@ ul.find b{color:var(--navy);font-weight:600}
  color:var(--gray);border:1px solid var(--gloss);border-radius:2px;padding:1px 7px;margin-left:7px;vertical-align:2px}
 footer{margin-top:60px;padding-top:18px;border-top:2px solid var(--navy);
  font-size:11.5px;color:var(--gray);line-height:1.8}
+.err{border-left:3px solid var(--red);padding:14px 18px;background:var(--soft);margin:40px 0;font-size:14px}
+.err b{color:var(--navy)}
+.load{color:var(--gray);font-size:14px;padding:40px 0}
 @media(max-width:620px){ul.cols{columns:1}h1{font-size:22px}.wrap{padding:28px 16px 48px}}
 </style>
 </head>
 <body>
-<div class="wrap">
+<div class="wrap" id="app"><p class="load">Cargando datos…</p></div>
 
-<header>
- <p class="eyebrow">Agencia Digital · Dirección de Mercadeo</p>
- <h1>BSC - Revisión de registro por Hotel</h1>
- <p class="sub">Costo por Canal y Participación Web Seg. Individual · Mayo – Agosto 2026 · 45 hoteles</p>
-</header>
+<script>
+const NAVY="#023859", BLOOD="#6399BA", GRAY="#808080", GLOSS="#D1D1D1";
+const R = x => Math.floor(x + 0.5);
+const esc = s => String(s).replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
 
-<div class="kpis">
- <div class="kpi"><div class="v">99</div><div class="l">Correcciones aplicadas<br>por la Agencia</div></div>
- <div class="kpi"><div class="v">73%</div><div class="l">Registros validados<br>sin intervención</div></div>
- <div class="kpi"><div class="v">76%</div><div class="d">▲ +6 pts vs. mayo</div><div class="l">Acierto del último mes<br>cerrado (agosto)</div></div>
- <div class="kpi"><div class="v">9</div><div class="l">Hoteles sin ninguna<br>corrección en el periodo</div></div>
-</div>
+function calcular(d){
+  const M = d.meses.length;
+  const apl = d.hoteles.filter(h => h.cc[0] !== 'N');
+  const N = apl.length;
+  const cnt = (campo, i) => apl.filter(h => h[campo][i] === 'C').length;
+  const CC = d.meses.map((_, i) => cnt('cc', i));
+  const PA = d.meses.map((_, i) => cnt('pa', i));
+  const CCT = CC.reduce((a,b) => a+b, 0);
+  const PAT = PA.reduce((a,b) => a+b, 0);
+  const TOT = CCT + PAT;
+  const ACI = R((N*2*M - TOT) / (N*2*M) * 100);
+  const GA = d.meses.map((_, i) => R((2*N - CC[i] - PA[i]) / (2*N) * 100));
+  const rank = apl.map(h => {
+    const c = [...h.cc].filter(x => x === 'C').length;
+    const p = [...h.pa].filter(x => x === 'C').length;
+    return {t: c+p, c, p, n: h.n};
+  }).sort((a,b) => b.t - a.t || a.n.localeCompare(b.n));
+  return {M, apl, N, CC, PA, CCT, PAT, TOT, ACI, GA, rank,
+          perf: rank.filter(r => r.t === 0).map(r => r.n),
+          top:  rank.filter(r => r.t >= M)};
+}
 
-<h2>El problema está en Participación, no en Costo por Canal</h2>
-<p class="lead">Costo por Canal pasó de 78 % a 89 % de acierto entre mayo y agosto. Participación Web Seg. Individual lleva cuatro meses entre 60 % y 64 %, sin ninguna mejora, y concentra 68 de las 99 correcciones del periodo.</p>
-<div class="card"><svg viewBox="0 0 720 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Acierto por mes y vertiente"><text x="0" y="14" font-size="12.5" font-weight="600" fill="#023859">Participación lleva cuatro meses plana; Costo por Canal sube 11 puntos</text><text x="0" y="31" font-size="11" fill="#808080">% de registros validados sin intervención de la Agencia</text><line x1="54" y1="264.0" x2="704" y2="264.0" stroke="#D1D1D1" stroke-width="1"/><text x="44" y="268.0" text-anchor="end" font-size="11" fill="#808080">0%</text><line x1="54" y1="209.0" x2="704" y2="209.0" stroke="#D1D1D1" stroke-width="1"/><text x="44" y="213.0" text-anchor="end" font-size="11" fill="#808080">25%</text><line x1="54" y1="154.0" x2="704" y2="154.0" stroke="#D1D1D1" stroke-width="1"/><text x="44" y="158.0" text-anchor="end" font-size="11" fill="#808080">50%</text><line x1="54" y1="99.0" x2="704" y2="99.0" stroke="#D1D1D1" stroke-width="1"/><text x="44" y="103.0" text-anchor="end" font-size="11" fill="#808080">75%</text><line x1="54" y1="44.0" x2="704" y2="44.0" stroke="#D1D1D1" stroke-width="1"/><text x="44" y="48.0" text-anchor="end" font-size="11" fill="#808080">100%</text><rect x="85.2" y="92.4" width="44" height="171.6" fill="#D1D1D1"/><text x="107.2" y="85.4" text-anchor="middle" font-size="13" font-weight="600" fill="#808080">78%</text><rect x="141.2" y="127.6" width="44" height="136.4" fill="#023859"/><text x="163.2" y="120.6" text-anchor="middle" font-size="13" font-weight="600" fill="#023859">62%</text><text x="135.2" y="286.0" text-anchor="middle" font-size="12.5" font-weight="600" fill="#023859">Mayo</text><rect x="247.8" y="83.6" width="44" height="180.4" fill="#D1D1D1"/><text x="269.8" y="76.6" text-anchor="middle" font-size="13" font-weight="600" fill="#808080">82%</text><rect x="303.8" y="132.0" width="44" height="132.0" fill="#023859"/><text x="325.8" y="125.0" text-anchor="middle" font-size="13" font-weight="600" fill="#023859">60%</text><text x="297.8" y="286.0" text-anchor="middle" font-size="12.5" font-weight="600" fill="#023859">Junio</text><rect x="410.2" y="83.6" width="44" height="180.4" fill="#D1D1D1"/><text x="432.2" y="76.6" text-anchor="middle" font-size="13" font-weight="600" fill="#808080">82%</text><rect x="466.2" y="123.2" width="44" height="140.8" fill="#023859"/><text x="488.2" y="116.2" text-anchor="middle" font-size="13" font-weight="600" fill="#023859">64%</text><text x="460.2" y="286.0" text-anchor="middle" font-size="12.5" font-weight="600" fill="#023859">Julio</text><rect x="572.8" y="68.2" width="44" height="195.8" fill="#D1D1D1"/><text x="594.8" y="61.2" text-anchor="middle" font-size="13" font-weight="600" fill="#808080">89%</text><rect x="628.8" y="127.6" width="44" height="136.4" fill="#023859"/><text x="650.8" y="120.6" text-anchor="middle" font-size="13" font-weight="600" fill="#023859">62%</text><text x="622.8" y="286.0" text-anchor="middle" font-size="12.5" font-weight="600" fill="#023859">Agosto</text><line x1="54" y1="264" x2="704" y2="264" stroke="#023859" stroke-width="1.5"/><rect x="54" y="299" width="11" height="11" fill="#D1D1D1"/><text x="71" y="308" font-size="12" fill="#808080">Costo por Canal</text><rect x="214" y="299" width="11" height="11" fill="#023859"/><text x="231" y="308" font-size="12" fill="#808080">Participación Web Seg. Individual</text></svg></div>
+function chart1(d, s){
+  const W=720, H=320, L=54, Rr=16, T=44, B=56, pw=W-L-Rr, ph=H-T-B;
+  const gw = pw/s.M, bw = Math.min(58, gw*0.27), gap = gw*0.075;
+  let o = '<svg viewBox="0 0 ' + W + ' ' + H + '" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Acierto por mes y vertiente">';
+  o += '<text x="0" y="14" font-size="12.5" font-weight="600" fill="' + NAVY + '">Participación frente a Costo por Canal, mes a mes</text>';
+  o += '<text x="0" y="31" font-size="11" fill="' + GRAY + '">% de registros validados sin intervención de la Agencia</text>';
+  for (let g=0; g<=100; g+=25){
+    const y = T+ph-ph*g/100;
+    o += '<line x1="' + L + '" y1="' + y.toFixed(1) + '" x2="' + (W-Rr) + '" y2="' + y.toFixed(1) + '" stroke="' + GLOSS + '" stroke-width="1"/>';
+    o += '<text x="' + (L-10) + '" y="' + (y+4).toFixed(1) + '" text-anchor="end" font-size="11" fill="' + GRAY + '">' + g + '%</text>';
+  }
+  d.meses.forEach((m, i) => {
+    const cx = L + gw*i + gw/2;
+    const pares = [[R((s.N-s.CC[i])/s.N*100), GLOSS, GRAY], [R((s.N-s.PA[i])/s.N*100), NAVY, NAVY]];
+    pares.forEach((par, j) => {
+      const v = par[0], col = par[1], tc = par[2];
+      const x = cx-(bw+gap/2)+j*(bw+gap), h = ph*v/100, y = T+ph-h;
+      o += '<rect x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + h.toFixed(1) + '" fill="' + col + '"/>';
+      o += '<text x="' + (x+bw/2).toFixed(1) + '" y="' + (y-7).toFixed(1) + '" text-anchor="middle" font-size="13" font-weight="600" fill="' + tc + '">' + v + '%</text>';
+    });
+    o += '<text x="' + cx.toFixed(1) + '" y="' + (T+ph+22) + '" text-anchor="middle" font-size="12.5" font-weight="600" fill="' + NAVY + '">' + esc(m) + '</text>';
+  });
+  o += '<line x1="' + L + '" y1="' + (T+ph) + '" x2="' + (W-Rr) + '" y2="' + (T+ph) + '" stroke="' + NAVY + '" stroke-width="1.5"/>';
+  const ly = H-12;
+  o += '<rect x="' + L + '" y="' + (ly-9) + '" width="11" height="11" fill="' + GLOSS + '"/><text x="' + (L+17) + '" y="' + ly + '" font-size="12" fill="' + GRAY + '">Costo por Canal</text>';
+  o += '<rect x="' + (L+160) + '" y="' + (ly-9) + '" width="11" height="11" fill="' + NAVY + '"/><text x="' + (L+177) + '" y="' + ly + '" font-size="12" fill="' + GRAY + '">Participación Web Seg. Individual</text>';
+  return o + '</svg>';
+}
 
-<div class="scroll">
-<table>
-<thead>
-<tr><th rowspan="2" style="vertical-align:bottom">Mes</th><th colspan="3" class="n">Costo por Canal</th><th colspan="3" class="n">Participación Web Seg. Individual</th><th rowspan="2" class="n" style="vertical-align:bottom">Acierto<br>global</th></tr>
-<tr><th class="n">Validado</th><th class="n">Corregido</th><th class="n">%</th><th class="n">Validado</th><th class="n">Corregido</th><th class="n">%</th></tr>
-</thead>
-<tbody><tr><td class="hl">Mayo</td><td class="n">35</td><td class="n">10</td><td class="n pct">78%</td><td class="n">28</td><td class="n">17</td><td class="n pct">62%</td><td class="n pct">70%</td></tr><tr><td class="hl">Junio</td><td class="n">37</td><td class="n">8</td><td class="n pct">82%</td><td class="n">27</td><td class="n">18</td><td class="n pct">60%</td><td class="n pct">71%</td></tr><tr><td class="hl">Julio</td><td class="n">37</td><td class="n">8</td><td class="n pct">82%</td><td class="n">29</td><td class="n">16</td><td class="n pct">64%</td><td class="n pct">73%</td></tr><tr><td class="hl">Agosto</td><td class="n">40</td><td class="n">5</td><td class="n pct">89%</td><td class="n">28</td><td class="n">17</td><td class="n pct">62%</td><td class="n pct">76%</td></tr><tr class="tot"><td class="hl">Total cuatrimestre</td><td class="n">149</td><td class="n">31</td><td class="n pct">83%</td><td class="n">112</td><td class="n">68</td><td class="n pct">62%</td><td class="n pct">73%</td></tr></tbody>
-</table>
-</div>
+function chart2(s){
+  const rows = s.top, W=720, rh=30, T=54, H=T+rows.length*rh+36, L=232, pw=W-L-70, mx=s.M*2;
+  let o = '<svg viewBox="0 0 ' + W + ' ' + H + '" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Hoteles con más correcciones">';
+  o += '<text x="0" y="14" font-size="12.5" font-weight="600" fill="' + NAVY + '">Hoteles que concentran las correcciones del periodo</text>';
+  o += '<text x="0" y="31" font-size="11" fill="' + GRAY + '">Correcciones sobre ' + mx + ' registros posibles (' + s.M + ' meses × 2 vertientes)</text>';
+  rows.forEach((r, i) => {
+    const y = T + i*rh, wc = pw*r.c/mx, wp = pw*r.p/mx;
+    o += '<text x="' + (L-12) + '" y="' + (y+15) + '" text-anchor="end" font-size="12.5" fill="' + NAVY + '">' + esc(r.n) + '</text>';
+    o += '<rect x="' + L + '" y="' + (y+3) + '" width="' + pw + '" height="17" fill="#F2F5F7"/>';
+    if (r.c) o += '<rect x="' + L + '" y="' + (y+3) + '" width="' + wc.toFixed(1) + '" height="17" fill="' + GLOSS + '"/>';
+    if (r.p) o += '<rect x="' + (L+wc).toFixed(1) + '" y="' + (y+3) + '" width="' + wp.toFixed(1) + '" height="17" fill="' + NAVY + '"/>';
+    o += '<text x="' + (L+wc+wp+9).toFixed(1) + '" y="' + (y+16) + '" font-size="13" font-weight="600" fill="' + NAVY + '">' + r.t + '</text>';
+  });
+  const ly = H-10;
+  o += '<rect x="' + L + '" y="' + (ly-9) + '" width="11" height="11" fill="' + GLOSS + '"/><text x="' + (L+17) + '" y="' + ly + '" font-size="12" fill="' + GRAY + '">Costo por Canal</text>';
+  o += '<rect x="' + (L+160) + '" y="' + (ly-9) + '" width="11" height="11" fill="' + NAVY + '"/><text x="' + (L+177) + '" y="' + ly + '" font-size="12" fill="' + GRAY + '">Participación</text>';
+  return o + '</svg>';
+}
 
-<h2>Las correcciones se concentran en pocos hoteles</h2>
-<p class="lead">Once hoteles acumulan 4 o más correcciones de 8 registros posibles. Trabajar sobre este grupo resuelve la mitad del total.</p>
-<div class="card"><svg viewBox="0 0 720 420" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Hoteles con más correcciones"><text x="0" y="14" font-size="12.5" font-weight="600" fill="#023859">Once hoteles concentran la mitad de las correcciones del cuatrimestre</text><text x="0" y="31" font-size="11" fill="#808080">Correcciones sobre 8 registros posibles (4 meses × 2 vertientes)</text><text x="220" y="69" text-anchor="end" font-size="12.5" fill="#023859">GHL Lago Titicaca</text><rect x="232" y="57" width="418" height="17" fill="#F2F5F7"/><rect x="232" y="57" width="52.2" height="17" fill="#D1D1D1"/><rect x="284.2" y="57" width="209.0" height="17" fill="#023859"/><text x="502.2" y="70" font-size="13" font-weight="600" fill="#023859">5</text><text x="220" y="99" text-anchor="end" font-size="12.5" fill="#023859">Makani Luxury Wanderlust</text><rect x="232" y="87" width="418" height="17" fill="#F2F5F7"/><rect x="232" y="87" width="209.0" height="17" fill="#D1D1D1"/><rect x="441.0" y="87" width="52.2" height="17" fill="#023859"/><text x="502.2" y="100" font-size="13" font-weight="600" fill="#023859">5</text><text x="220" y="129" text-anchor="end" font-size="12.5" fill="#023859">Park Lake</text><rect x="232" y="117" width="418" height="17" fill="#F2F5F7"/><rect x="232" y="117" width="104.5" height="17" fill="#D1D1D1"/><rect x="336.5" y="117" width="156.8" height="17" fill="#023859"/><text x="502.2" y="130" font-size="13" font-weight="600" fill="#023859">5</text><text x="220" y="159" text-anchor="end" font-size="12.5" fill="#023859">GHL Coll. Biohotel</text><rect x="232" y="147" width="418" height="17" fill="#F2F5F7"/><rect x="232" y="147" width="156.8" height="17" fill="#D1D1D1"/><rect x="388.8" y="147" width="52.2" height="17" fill="#023859"/><text x="450.0" y="160" font-size="13" font-weight="600" fill="#023859">4</text><text x="220" y="189" text-anchor="end" font-size="12.5" fill="#023859">GHL Porton Medellin</text><rect x="232" y="177" width="418" height="17" fill="#F2F5F7"/><rect x="232" y="177" width="52.2" height="17" fill="#D1D1D1"/><rect x="284.2" y="177" width="156.8" height="17" fill="#023859"/><text x="450.0" y="190" font-size="13" font-weight="600" fill="#023859">4</text><text x="220" y="219" text-anchor="end" font-size="12.5" fill="#023859">GHL Style Barrancabermeja</text><rect x="232" y="207" width="418" height="17" fill="#F2F5F7"/><rect x="232" y="207" width="52.2" height="17" fill="#D1D1D1"/><rect x="284.2" y="207" width="156.8" height="17" fill="#023859"/><text x="450.0" y="220" font-size="13" font-weight="600" fill="#023859">4</text><text x="220" y="249" text-anchor="end" font-size="12.5" fill="#023859">GHL Style Bogota Occ.</text><rect x="232" y="237" width="418" height="17" fill="#F2F5F7"/><rect x="232.0" y="237" width="209.0" height="17" fill="#023859"/><text x="450.0" y="250" font-size="13" font-weight="600" fill="#023859">4</text><text x="220" y="279" text-anchor="end" font-size="12.5" fill="#023859">Geotel Antofagasta</text><rect x="232" y="267" width="418" height="17" fill="#F2F5F7"/><rect x="232" y="267" width="52.2" height="17" fill="#D1D1D1"/><rect x="284.2" y="267" width="156.8" height="17" fill="#023859"/><text x="450.0" y="280" font-size="13" font-weight="600" fill="#023859">4</text><text x="220" y="309" text-anchor="end" font-size="12.5" fill="#023859">Geotel Calama</text><rect x="232" y="297" width="418" height="17" fill="#F2F5F7"/><rect x="232.0" y="297" width="209.0" height="17" fill="#023859"/><text x="450.0" y="310" font-size="13" font-weight="600" fill="#023859">4</text><text x="220" y="339" text-anchor="end" font-size="12.5" fill="#023859">Sonesta Bucaramanga</text><rect x="232" y="327" width="418" height="17" fill="#F2F5F7"/><rect x="232" y="327" width="52.2" height="17" fill="#D1D1D1"/><rect x="284.2" y="327" width="156.8" height="17" fill="#023859"/><text x="450.0" y="340" font-size="13" font-weight="600" fill="#023859">4</text><text x="220" y="369" text-anchor="end" font-size="12.5" fill="#023859">Z_Sonesta Miraflores</text><rect x="232" y="357" width="418" height="17" fill="#F2F5F7"/><rect x="232" y="357" width="52.2" height="17" fill="#D1D1D1"/><rect x="284.2" y="357" width="156.8" height="17" fill="#023859"/><text x="450.0" y="370" font-size="13" font-weight="600" fill="#023859">4</text><rect x="232" y="401" width="11" height="11" fill="#D1D1D1"/><text x="249" y="410" font-size="12" fill="#808080">Costo por Canal</text><rect x="392" y="401" width="11" height="11" fill="#023859"/><text x="409" y="410" font-size="12" fill="#808080">Participación</text></svg></div>
+function tablaMes(d, s){
+  let f = '';
+  d.meses.forEach((m, i) => {
+    f += '<tr><td class="hl">' + esc(m) + '</td>'
+      + '<td class="n">' + (s.N-s.CC[i]) + '</td><td class="n">' + s.CC[i] + '</td><td class="n pct">' + R((s.N-s.CC[i])/s.N*100) + '%</td>'
+      + '<td class="n">' + (s.N-s.PA[i]) + '</td><td class="n">' + s.PA[i] + '</td><td class="n pct">' + R((s.N-s.PA[i])/s.N*100) + '%</td>'
+      + '<td class="n pct">' + s.GA[i] + '%</td></tr>';
+  });
+  const tot = s.N*s.M;
+  f += '<tr class="tot"><td class="hl">Total periodo</td>'
+    + '<td class="n">' + (tot-s.CCT) + '</td><td class="n">' + s.CCT + '</td><td class="n pct">' + R((tot-s.CCT)/tot*100) + '%</td>'
+    + '<td class="n">' + (tot-s.PAT) + '</td><td class="n">' + s.PAT + '</td><td class="n pct">' + R((tot-s.PAT)/tot*100) + '%</td>'
+    + '<td class="n pct">' + s.ACI + '%</td></tr>';
+  return '<div class="scroll"><table><thead>'
+    + '<tr><th rowspan="2" style="vertical-align:bottom">Mes</th><th colspan="3" class="n">Costo por Canal</th><th colspan="3" class="n">Participación Web Seg. Individual</th><th rowspan="2" class="n" style="vertical-align:bottom">Acierto<br>global</th></tr>'
+    + '<tr><th class="n">Validado</th><th class="n">Corregido</th><th class="n">%</th><th class="n">Validado</th><th class="n">Corregido</th><th class="n">%</th></tr>'
+    + '</thead><tbody>' + f + '</tbody></table></div>';
+}
 
-<h2>Detalle hotel por hotel</h2>
-<p class="lead">✓ Validado · ✕ Corregido. Un hotel puede registrar bien una vertiente y mal la otra.</p>
-<div class="scroll"><table class="mx"><thead><tr><th rowspan="2" class="hl">Hotel</th><th colspan="4">Costo por Canal</th><th colspan="4" class="sep">Participación Web Seg. Individual</th><th rowspan="2" class="sep">Total</th></tr><tr><th class="mm">May</th><th class="mm">Jun</th><th class="mm">Jul</th><th class="mm">Ago</th><th class="mm sep">May</th><th class="mm">Jun</th><th class="mm">Jul</th><th class="mm">Ago</th></tr></thead><tbody><tr><td class="hl">Geotel Antofagasta</td><td class="c bad">✕</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok sep">✓</td><td class="c bad">✕</td><td class="c bad">✕</td><td class="c bad">✕</td><td class="tt sep ">4</td></tr><tr><td class="hl">Geotel Calama</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c bad sep">✕</td><td class="c bad">✕</td><td class="c bad">✕</td><td class="c bad">✕</td><td class="tt sep ">4</td></tr><tr><td class="hl">Park Lake</td><td class="c bad">✕</td><td class="c bad">✕</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c bad sep">✕</td><td class="c bad">✕</td><td class="c bad">✕</td><td class="c ok">✓</td><td class="tt sep ">5</td></tr><tr><td class="hl">Sonesta Osorno</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok sep">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c bad">✕</td><td class="tt sep ">1</td></tr><tr><td class="hl">GHL Abadia Plaza</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c bad sep">✕</td><td class="c bad">✕</td><td class="c bad">✕</td><td class="c ok">✓</td><td class="tt sep ">3</td></tr><tr><td class="hl">GHL Barranquilla</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok sep">✓</td><td class="c bad">✕</td><td class="c bad">✕</td><td class="c ok">✓</td><td class="tt sep ">2</td></tr><tr><td class="hl">GHL Capital</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok sep">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="tt sep t0">0</td></tr><tr><td class="hl">GHL Coll. 93</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c bad sep">✕</td><td class="c ok">✓</td><td class="c bad">✕</td><td class="c ok">✓</td><td class="tt sep ">2</td></tr><tr><td class="hl">GHL Coll. Armeria Real</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok sep">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="tt sep t0">0</td></tr><tr><td class="hl">GHL Coll. Arsenal</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok sep">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="tt sep t0">0</td></tr><tr><td class="hl">GHL Coll. Bastion</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c bad">✕</td><td class="c bad">✕</td><td class="c ok sep">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c bad">✕</td><td class="tt sep ">3</td></tr><tr><td class="hl">GHL Coll. Biohotel</td><td class="c ok">✓</td><td class="c bad">✕</td><td class="c bad">✕</td><td class="c bad">✕</td><td class="c ok sep">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c bad">✕</td><td class="tt sep ">4</td></tr><tr><td class="hl">GHL Coll. Bioxury</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c bad sep">✕</td><td class="c bad">✕</td><td class="c ok">✓</td><td class="c bad">✕</td><td class="tt sep ">3</td></tr><tr><td class="hl">GHL Coll. Hamilton</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok sep">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="tt sep t0">0</td></tr><tr><td class="hl">GHL Coll. San Lazaro Art</td><td class="c ok">✓</td><td class="c bad">✕</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c bad sep">✕</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="tt sep ">2</td></tr><tr><td class="hl">GHL Grand Villavicencio</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok sep">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="tt sep t0">0</td></tr><tr><td class="hl">GHL Monteria</td><td class="c bad">✕</td><td class="c bad">✕</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok sep">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="tt sep ">2</td></tr><tr><td class="hl">GHL Porton Medellin</td><td class="c bad">✕</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c bad sep">✕</td><td class="c bad">✕</td><td class="c bad">✕</td><td class="c ok">✓</td><td class="tt sep ">4</td></tr><tr><td class="hl">GHL Relax Corales</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok sep">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="tt sep t0">0</td></tr><tr><td class="hl">GHL Relax Costa Azul</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c bad sep">✕</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="tt sep ">1</td></tr><tr><td class="hl">GHL Relax El Puente</td><td class="c bad">✕</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok sep">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="tt sep ">1</td></tr><tr><td class="hl">GHL Relax Sunrise</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c bad">✕</td><td class="c ok">✓</td><td class="c ok sep">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c bad">✕</td><td class="tt sep ">2</td></tr><tr><td class="hl">GHL Style Barrancabermeja</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c bad">✕</td><td class="c ok">✓</td><td class="c bad sep">✕</td><td class="c bad">✕</td><td class="c ok">✓</td><td class="c bad">✕</td><td class="tt sep ">4</td></tr><tr><td class="hl">GHL Style Bogota Occ.</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c bad sep">✕</td><td class="c bad">✕</td><td class="c bad">✕</td><td class="c bad">✕</td><td class="tt sep ">4</td></tr><tr><td class="hl">GHL Style Neiva</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c bad">✕</td><td class="c ok">✓</td><td class="c ok sep">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="tt sep ">1</td></tr><tr><td class="hl">GHL Style Yopal</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c bad sep">✕</td><td class="c bad">✕</td><td class="c ok">✓</td><td class="c bad">✕</td><td class="tt sep ">3</td></tr><tr><td class="hl">GHL Tequendama</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok sep">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="tt sep t0">0</td></tr><tr><td class="hl">Makani Luxury Wanderlust</td><td class="c bad">✕</td><td class="c bad">✕</td><td class="c bad">✕</td><td class="c bad">✕</td><td class="c ok sep">✓</td><td class="c ok">✓</td><td class="c bad">✕</td><td class="c ok">✓</td><td class="tt sep ">5</td></tr><tr><td class="hl">Sonesta Bogota</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c bad">✕</td><td class="c ok">✓</td><td class="c ok sep">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c bad">✕</td><td class="tt sep ">2</td></tr><tr><td class="hl">Sonesta Bucaramanga</td><td class="c ok">✓</td><td class="c bad">✕</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c bad sep">✕</td><td class="c ok">✓</td><td class="c bad">✕</td><td class="c bad">✕</td><td class="tt sep ">4</td></tr><tr><td class="hl">Sonesta Cali</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok sep">✓</td><td class="c bad">✕</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="tt sep ">1</td></tr><tr><td class="hl">Sonesta Cartagena</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c bad sep">✕</td><td class="c bad">✕</td><td class="c bad">✕</td><td class="c ok">✓</td><td class="tt sep ">3</td></tr><tr><td class="hl">Sonesta Ibague</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c bad sep">✕</td><td class="c bad">✕</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="tt sep ">2</td></tr><tr><td class="hl">Sonesta Pereira</td><td class="c bad">✕</td><td class="c bad">✕</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok sep">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c bad">✕</td><td class="tt sep ">3</td></tr><tr><td class="hl">Sonesta Valledupar</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok sep">✓</td><td class="c bad">✕</td><td class="c ok">✓</td><td class="c bad">✕</td><td class="tt sep ">2</td></tr><tr><td class="hl">Z_Irotama resort</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok sep">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="tt sep t0">0</td></tr><tr><td class="hl">Sonesta Loja</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok sep">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="tt sep t0">0</td></tr><tr><td class="hl">Latam Xela</td><td class="c bad">✕</td><td class="c ok">✓</td><td class="c bad">✕</td><td class="c ok">✓</td><td class="c ok sep">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="tt sep ">2</td></tr><tr><td class="hl">GHL Lago Titicaca</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c bad">✕</td><td class="c bad sep">✕</td><td class="c bad">✕</td><td class="c bad">✕</td><td class="c bad">✕</td><td class="tt sep ">5</td></tr><tr><td class="hl">SPI Puno</td><td class="c bad">✕</td><td class="c bad">✕</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok sep">✓</td><td class="c ok">✓</td><td class="c bad">✕</td><td class="c ok">✓</td><td class="tt sep ">3</td></tr><tr><td class="hl">SPI Yucay</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c bad">✕</td><td class="c ok sep">✓</td><td class="c bad">✕</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="tt sep ">2</td></tr><tr><td class="hl">Sonesta Arequipa</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok sep">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c bad">✕</td><td class="tt sep ">1</td></tr><tr><td class="hl">Sonesta Cusco</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c bad sep">✕</td><td class="c bad">✕</td><td class="c bad">✕</td><td class="c ok">✓</td><td class="tt sep ">3</td></tr><tr><td class="hl">Sonesta Olivar</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok sep">✓</td><td class="c ok">✓</td><td class="c bad">✕</td><td class="c bad">✕</td><td class="tt sep ">2</td></tr><tr><td class="hl">Z_Sonesta Miraflores</td><td class="c bad">✕</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c ok">✓</td><td class="c bad sep">✕</td><td class="c bad">✕</td><td class="c bad">✕</td><td class="c ok">✓</td><td class="tt sep ">4</td></tr></tbody></table></div>
+function matriz(d, s){
+  const th = sep => d.meses.map((m,k) => '<th class="mm' + (sep && k===0 ? ' sep' : '') + '">' + esc(m).slice(0,3) + '</th>').join('');
+  const tm = {};
+  s.rank.forEach(r => { tm[r.n] = r.t; });
+  let body = '';
+  s.apl.forEach(h => {
+    const t = tm[h.n];
+    let cells = '';
+    ['cc','pa'].forEach((campo, i) => {
+      [...h[campo]].forEach((v, k) => {
+        const sep = (i === 1 && k === 0) ? ' sep' : '';
+        cells += '<td class="c ' + (v === 'V' ? 'ok' : 'bad') + sep + '">' + (v === 'V' ? '✓' : '✕') + '</td>';
+      });
+    });
+    body += '<tr><td class="hl">' + esc(h.n) + '</td>' + cells + '<td class="tt sep ' + (t === 0 ? 't0' : '') + '">' + t + '</td></tr>';
+  });
+  return '<div class="scroll"><table class="mx"><thead>'
+    + '<tr><th rowspan="2" class="hl">Hotel</th><th colspan="' + s.M + '">Costo por Canal</th><th colspan="' + s.M + '" class="sep">Participación Web Seg. Individual</th><th rowspan="2" class="sep">Total</th></tr>'
+    + '<tr>' + th(false) + th(true) + '</tr></thead><tbody>' + body + '</tbody></table></div>';
+}
 
-<h2>Hoteles impecables en el periodo</h2>
-<p class="lead">Ocho de ocho registros validados durante los cuatro meses. Son el estándar a replicar.</p>
-<ul class="cols"><li>GHL Capital</li><li>GHL Coll. Armeria Real</li><li>GHL Coll. Arsenal</li><li>GHL Coll. Hamilton</li><li>GHL Grand Villavicencio</li><li>GHL Relax Corales</li><li>GHL Tequendama</li><li>Sonesta Loja</li><li>Z_Irotama resort</li></ul>
+function render(d){
+  const s = calcular(d);
+  const mx = s.M*2;
+  const delta = s.GA[s.M-1] - s.GA[0];
+  const ccIni = R((s.N-s.CC[0])/s.N*100), ccFin = R((s.N-s.CC[s.M-1])/s.N*100);
+  const paPct = s.PA.map((_,i) => R((s.N-s.PA[i])/s.N*100));
+  const paMin = Math.min.apply(null, paPct), paMax = Math.max.apply(null, paPct);
+  const mes0 = esc(d.meses[0]).toLowerCase(), mesF = esc(d.meses[s.M-1]).toLowerCase();
 
-<h2>Qué tipo de error se está cometiendo</h2>
-<p class="lead">No todas las correcciones pesan igual. De las 99 del periodo, 38 son errores reales que cambian la lectura del dato; las otras 61 son diferencias de uno o dos puntos por redondeo o fecha de corte.</p>
+  let h = '<header>'
+    + '<p class="eyebrow">Agencia Digital · Dirección de Mercadeo</p>'
+    + '<h1>' + esc(d.titulo) + '</h1>'
+    + '<p class="sub">Costo por Canal y Participación Web Seg. Individual · ' + esc(d.periodo) + ' · ' + s.N + ' hoteles</p>'
+    + '</header>'
+    + '<div class="kpis">'
+    + '<div class="kpi"><div class="v">' + s.TOT + '</div><div class="l">Correcciones aplicadas<br>por la Agencia</div></div>'
+    + '<div class="kpi"><div class="v">' + s.ACI + '%</div><div class="l">Registros validados<br>sin intervención</div></div>'
+    + '<div class="kpi"><div class="v">' + s.GA[s.M-1] + '%</div>'
+      + (delta > 0 ? '<div class="d">▲ +' + delta + ' pts vs. ' + mes0 + '</div>' : '')
+      + '<div class="l">Acierto del último mes<br>cerrado (' + mesF + ')</div></div>'
+    + '<div class="kpi"><div class="v">' + s.perf.length + '</div><div class="l">Hoteles sin ninguna<br>corrección en el periodo</div></div>'
+    + '</div>'
+    + '<h2>El problema está en Participación, no en Costo por Canal</h2>'
+    + '<p class="lead">Costo por Canal pasó de ' + ccIni + ' % a ' + ccFin + ' % de acierto entre ' + mes0 + ' y ' + mesF
+      + '. Participación Web Seg. Individual lleva ' + s.M + ' meses entre ' + paMin + ' % y ' + paMax + ' %, y concentra '
+      + s.PAT + ' de las ' + s.TOT + ' correcciones del periodo.</p>'
+    + '<div class="card">' + chart1(d, s) + '</div>'
+    + tablaMes(d, s)
+    + '<h2>Las correcciones se concentran en pocos hoteles</h2>'
+    + '<p class="lead">' + s.top.length + ' hoteles acumulan ' + s.M + ' o más correcciones de ' + mx
+      + ' registros posibles. Trabajar sobre este grupo resuelve buena parte del total.</p>'
+    + '<div class="card">' + chart2(s) + '</div>'
+    + '<h2>Detalle hotel por hotel</h2>'
+    + '<p class="lead">✓ Validado · ✕ Corregido. Un hotel puede registrar bien una vertiente y mal la otra.</p>'
+    + matriz(d, s)
+    + '<h2>Hoteles impecables en el periodo</h2>'
+    + '<p class="lead">' + mx + ' de ' + mx + ' registros validados durante los ' + s.M + ' meses. Son el estándar a replicar.</p>'
+    + '<ul class="cols">' + s.perf.map(n => '<li>' + esc(n) + '</li>').join('') + '</ul>';
 
-<ul class="find">
-<li><b>Campo equivocado en Participación</b> <span class="tag">Error grave</span><br>
-Style Yopal registró 50 % en mayo y 51 % en junio, con un real de 13 % en ambos meses. Abadía Plaza reportó 97 % en junio contra un real de 9 %. Barranquilla registró 80 % en junio y 77 % en julio, ambos con real de 10 %. El patrón se repite mes a mes: están tomando la participación total del canal en lugar del segmento Individual.</li>
+  if (d.hallazgos && d.hallazgos.length){
+    h += '<h2>Qué tipo de error se está cometiendo</h2>';
+    if (d.errores && d.errores.graves != null){
+      h += '<p class="lead">No todas las correcciones pesan igual. De las ' + s.TOT + ' del periodo, ' + d.errores.graves
+         + ' son errores reales que cambian la lectura del dato; las otras ' + d.errores.leves
+         + ' son diferencias de uno o dos puntos por redondeo o fecha de corte.</p>';
+    }
+    h += '<ul class="find">' + d.hallazgos.map(x =>
+      '<li class="' + (x.nivel === 'bajo' ? 'low' : '') + '"><b>' + esc(x.titulo) + '</b> <span class="tag">'
+      + esc(x.tag) + '</span><br>' + esc(x.texto) + '</li>').join('') + '</ul>';
+  }
 
-<li><b>Hoteles que no reportan</b> <span class="tag">Error grave</span><br>
-Park Lake dejó ambas vertientes en 0 % durante mayo y junio. Desde julio ya registra, pero la serie del periodo queda incompleta.</li>
+  h += '<footer>Elaborado por: Agencia Digital · Dirección de Mercadeo · Oficina Central GHL · ' + esc(d.elaborado)
+    + '<br>Fuente: matriz de revisión Agencia Digital, ' + esc(d.periodo).toLowerCase()
+    + '. Base de cálculo: ' + s.N + ' hoteles aplicables por mes y vertiente.</footer>';
 
-<li class="low"><b>Bastión: la revisión arroja 0 %</b> <span class="tag">Revisar fuente</span><br>
-En julio y agosto el hotel registró 11 % y 13 % en Costo por Canal, pero la revisión dio 0 %. El hotel tampoco aparece en el tablero de Costo por Canal. Antes de atribuirle el error al hotel conviene verificar si la propiedad está cargando en la fuente.</li>
+  document.getElementById('app').innerHTML = h;
+  document.title = d.titulo;
+}
 
-<li class="low"><b>Diferencias grandes en Costo por Canal</b> <span class="tag">Revisar</span><br>
-Relax Sunrise registró 34 % en julio contra un real de 16 %. Style Barrancabermeja registró 15 % contra un real de 34 % el mismo mes. Miraflores reportó 15 % en mayo contra 23 % real. Son casos aislados, pero de magnitud suficiente para distorsionar el consolidado.</li>
-</ul>
-
-<footer>
-Elaborado por: Agencia Digital · Dirección de Mercadeo · Oficina Central GHL · Septiembre 2026<br>
-Fuente: matriz de revisión Agencia Digital, mayo – agosto 2026. Base de cálculo: 45 hoteles aplicables por mes y vertiente.
-</footer>
-
-</div>
+fetch('datos.json?v=' + Date.now())
+  .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+  .then(render)
+  .catch(e => {
+    document.getElementById('app').innerHTML =
+      '<div class="err"><b>No se pudieron cargar los datos.</b><br>' + esc(e.message)
+      + '<br><br>Revise que el archivo <code>datos.json</code> esté en la misma carpeta que esta página y que su contenido sea JSON válido. El error más común es una coma de más al final de una lista.</div>';
+  });
+</script>
 </body>
 </html>

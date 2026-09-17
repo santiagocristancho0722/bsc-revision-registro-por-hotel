@@ -1,0 +1,84 @@
+{
+  "_ayuda": "Cada hotel trae cc (Costo por Canal) y pa (Participacion). Una letra por mes, en el orden de meses: V=Validado, C=Corregido, N=No aplica. Para agregar un mes: sumelo a meses y agregue una letra al final de cada cc y pa.",
+  "titulo": "BSC - Revisión de registro por Hotel",
+  "periodo": "Mayo – Agosto 2026",
+  "elaborado": "Septiembre 2026",
+  "meses": ["Mayo", "Junio", "Julio", "Agosto"],
+  "errores": {"graves": 38, "leves": 61},
+
+  "hoteles": [
+    {"n": "Geotel Antofagasta",            "cc": "CVVV", "pa": "VCCC"},
+    {"n": "Geotel Calama",                 "cc": "VVVV", "pa": "CCCC"},
+    {"n": "Park Lake",                     "cc": "CCVV", "pa": "CCCV"},
+    {"n": "Sonesta Osorno",                "cc": "VVVV", "pa": "VVVC"},
+    {"n": "GHL Abadia Plaza",              "cc": "VVVV", "pa": "CCCV"},
+    {"n": "GHL Barranquilla",              "cc": "VVVV", "pa": "VCCV"},
+    {"n": "GHL Capital",                   "cc": "VVVV", "pa": "VVVV"},
+    {"n": "GHL Coll. 93",                  "cc": "VVVV", "pa": "CVCV"},
+    {"n": "GHL Coll. Armeria Real",        "cc": "VVVV", "pa": "VVVV"},
+    {"n": "GHL Coll. Arsenal",             "cc": "VVVV", "pa": "VVVV"},
+    {"n": "GHL Coll. Bastion",             "cc": "VVCC", "pa": "VVVC"},
+    {"n": "GHL Coll. Biohotel",            "cc": "VCCC", "pa": "VVVC"},
+    {"n": "GHL Coll. Bioxury",             "cc": "VVVV", "pa": "CCVC"},
+    {"n": "GHL Coll. Hamilton",            "cc": "VVVV", "pa": "VVVV"},
+    {"n": "GHL Coll. San Lazaro Art",      "cc": "VCVV", "pa": "CVVV"},
+    {"n": "GHL Grand Villavicencio",       "cc": "VVVV", "pa": "VVVV"},
+    {"n": "GHL Monteria",                  "cc": "CCVV", "pa": "VVVV"},
+    {"n": "GHL Porton Medellin",           "cc": "CVVV", "pa": "CCCV"},
+    {"n": "GHL Relax Corales",             "cc": "VVVV", "pa": "VVVV"},
+    {"n": "GHL Relax Costa Azul",          "cc": "VVVV", "pa": "CVVV"},
+    {"n": "GHL Relax El Puente",           "cc": "CVVV", "pa": "VVVV"},
+    {"n": "GHL Relax Sunrise",             "cc": "VVCV", "pa": "VVVC"},
+    {"n": "GHL Style Barrancabermeja",     "cc": "VVCV", "pa": "CCVC"},
+    {"n": "GHL Style Bogota Occ.",         "cc": "VVVV", "pa": "CCCC"},
+    {"n": "GHL Style Neiva",               "cc": "VVCV", "pa": "VVVV"},
+    {"n": "GHL Style Yopal",               "cc": "VVVV", "pa": "CCVC"},
+    {"n": "GHL Tequendama",                "cc": "VVVV", "pa": "VVVV"},
+    {"n": "Makani Beach Club",             "cc": "NNNN", "pa": "NNNN"},
+    {"n": "Makani Luxury Wanderlust",      "cc": "CCCC", "pa": "VVCV"},
+    {"n": "Sonesta Bogota",                "cc": "VVCV", "pa": "VVVC"},
+    {"n": "Sonesta Bucaramanga",           "cc": "VCVV", "pa": "CVCC"},
+    {"n": "Sonesta Cali",                  "cc": "VVVV", "pa": "VCVV"},
+    {"n": "Sonesta Cartagena",             "cc": "VVVV", "pa": "CCCV"},
+    {"n": "Sonesta Ibague",                "cc": "VVVV", "pa": "CCVV"},
+    {"n": "Sonesta Pereira",               "cc": "CCVV", "pa": "VVVC"},
+    {"n": "Sonesta Valledupar",            "cc": "VVVV", "pa": "VCVC"},
+    {"n": "Z_Irotama resort",              "cc": "VVVV", "pa": "VVVV"},
+    {"n": "Sonesta Loja",                  "cc": "VVVV", "pa": "VVVV"},
+    {"n": "Latam Xela",                    "cc": "CVCV", "pa": "VVVV"},
+    {"n": "GHL Lago Titicaca",             "cc": "VVVC", "pa": "CCCC"},
+    {"n": "SPI Puno",                      "cc": "CCVV", "pa": "VVCV"},
+    {"n": "SPI Yucay",                     "cc": "VVVC", "pa": "VCVV"},
+    {"n": "Sonesta Arequipa",              "cc": "VVVV", "pa": "VVVC"},
+    {"n": "Sonesta Cusco",                 "cc": "VVVV", "pa": "CCCV"},
+    {"n": "Sonesta Olivar",                "cc": "VVVV", "pa": "VVCC"},
+    {"n": "Z_Sonesta Miraflores",          "cc": "CVVV", "pa": "CCCV"}
+  ],
+
+  "hallazgos": [
+    {
+      "titulo": "Campo equivocado en Participación",
+      "tag": "Error grave",
+      "nivel": "alto",
+      "texto": "Style Yopal registró 50 % en mayo y 51 % en junio, con un real de 13 % en ambos meses. Abadía Plaza reportó 97 % en junio contra un real de 9 %. Barranquilla registró 80 % en junio y 77 % en julio, ambos con real de 10 %. El patrón se repite mes a mes: están tomando la participación total del canal en lugar del segmento Individual."
+    },
+    {
+      "titulo": "Hoteles que no reportan",
+      "tag": "Error grave",
+      "nivel": "alto",
+      "texto": "Park Lake dejó ambas vertientes en 0 % durante mayo y junio. Desde julio ya registra, pero la serie del periodo queda incompleta."
+    },
+    {
+      "titulo": "Bastión: la revisión arroja 0 %",
+      "tag": "Revisar fuente",
+      "nivel": "bajo",
+      "texto": "En julio y agosto el hotel registró 11 % y 13 % en Costo por Canal, pero la revisión dio 0 %. El hotel tampoco aparece en el tablero de Costo por Canal. Antes de atribuirle el error al hotel conviene verificar si la propiedad está cargando en la fuente."
+    },
+    {
+      "titulo": "Diferencias grandes en Costo por Canal",
+      "tag": "Revisar",
+      "nivel": "bajo",
+      "texto": "Relax Sunrise registró 34 % en julio contra un real de 16 %. Style Barrancabermeja registró 15 % contra un real de 34 % el mismo mes. Miraflores reportó 15 % en mayo contra 23 % real. Son casos aislados, pero de magnitud suficiente para distorsionar el consolidado."
+    }
+  ]
+}
